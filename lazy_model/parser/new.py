@@ -38,18 +38,21 @@ class LazyModel(BaseModel):
         return m
 
     def _parse_value(self, name, value):
-        field_type = self.model_fields.get(name).annotation
+        field_type = self.__class__.model_fields.get(name).annotation
         try:
             value = TypeAdapter(field_type).validate_python(value)
         except ValidationError as e:
-            if value is None and self.model_fields.get(name).required is False:
+            if (
+                value is None
+                and self.__class__.model_fields.get(name).required is False
+            ):
                 value = None
             else:
                 raise e
         return value
 
     def parse_store(self):
-        for name in self.model_fields:
+        for name in self.__class__.model_fields:
             self.__getattribute__(name)
 
     def _set_attr(self, name: str, value: Any) -> None:
@@ -106,7 +109,7 @@ class LazyModel(BaseModel):
         # For instances, use the object's __getattribute__ to prevent recursion
         res = object.__getattribute__(self, item)
         if res is NAO:
-            field_info = self.model_fields.get(item)
+            field_info = self.__class__.model_fields.get(item)
             alias = field_info.alias or item
             value = self._store.get(alias, NAO)
             if value is NAO:
