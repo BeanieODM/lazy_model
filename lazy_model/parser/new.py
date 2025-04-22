@@ -42,7 +42,10 @@ class LazyModel(BaseModel):
         try:
             value = TypeAdapter(field_type).validate_python(value)
         except ValidationError as e:
-            if value is None and self.__class__.model_fields.get(name).required is False:
+            if (
+                value is None
+                and self.__class__.model_fields.get(name).required is False
+            ):
                 value = None
             else:
                 raise e
