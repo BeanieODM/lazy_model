@@ -1,6 +1,6 @@
 from lazy_model import LazyModel
 from lazy_model.nao import NAO
-from tests.models import Simple, Nested, Inherited, WithAlias
+from tests.models import Inherited, Nested, Simple, WithAlias
 
 
 class TestParsing:

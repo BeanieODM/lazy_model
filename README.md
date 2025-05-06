@@ -4,6 +4,11 @@ This library provides a lazy interface for parsing objects from dictionaries. Du
 
 ## Install
 
+uv
+```shell
+uv add lazy-model
+```
+
 poetry
 ```shell
 poetry add lazy-model
