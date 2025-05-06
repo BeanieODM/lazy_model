@@ -1,4 +1,4 @@
-from lazy_model.main import LazyModel
 from lazy_model.nao import NAO
+from lazy_model.parser.lazy_model import LazyModel
 
-__all__ = ["LazyModel", "NAO"]
+__all__ = ["NAO", "LazyModel"]
