@@ -98,6 +98,7 @@ class LazyModel(BaseModel):
         self.__pydantic_validator__.validate_assignment(self, name, value)
 
     if not TYPE_CHECKING:
+
         def __getattribute__(self, item):
             # If __class__ is accessed, return it directly to avoid recursion
             if item == "__class__":
