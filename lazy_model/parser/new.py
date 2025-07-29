@@ -104,11 +104,13 @@ class LazyModel(BaseModel):
             if item == "__class__":
                 return super().__getattribute__(item)
 
-            # If called on the class itself, delegate to super's __getattribute__
+            # If called on the class itself,
+            # delegate to super's __getattribute__
             if type(self) is type:  # Check if self is a class
                 return super(type, self).__getattribute__(item)
 
-            # For instances, use the object's __getattribute__ to prevent recursion
+            # For instances, use the object's __getattribute__
+            # to prevent recursion
             res = object.__getattribute__(self, item)
             if res is NAO:
                 field_info = self.__class__.model_fields.get(item)
