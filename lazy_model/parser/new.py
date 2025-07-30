@@ -1,4 +1,4 @@
-from typing import Any, Optional, Set, Dict
+from typing import TYPE_CHECKING, Any, Optional, Set, Dict
 
 import pydantic_core
 from pydantic import BaseModel, PrivateAttr, ValidationError, TypeAdapter
@@ -97,25 +97,29 @@ class LazyModel(BaseModel):
             attr.__set__(self, value)
         self.__pydantic_validator__.validate_assignment(self, name, value)
 
-    def __getattribute__(self, item):
-        # If __class__ is accessed, return it directly to avoid recursion
-        if item == "__class__":
-            return super().__getattribute__(item)
+    if not TYPE_CHECKING:
 
-        # If called on the class itself, delegate to super's __getattribute__
-        if type(self) is type:  # Check if self is a class
-            return super(type, self).__getattribute__(item)
+        def __getattribute__(self, item):
+            # If __class__ is accessed, return it directly to avoid recursion
+            if item == "__class__":
+                return super().__getattribute__(item)
 
-        # For instances, use the object's __getattribute__ to prevent recursion
-        res = object.__getattribute__(self, item)
-        if res is NAO:
-            field_info = self.__class__.model_fields.get(item)
-            alias = field_info.alias or item
-            value = self._store.get(alias, NAO)
-            if value is NAO:
-                value = field_info.get_default()
-            else:
-                value = self._parse_value(item, value)
-            self._set_attr(item, value)
-            res = super(LazyModel, self).__getattribute__(item)
-        return res
+            # If called on the class itself,
+            # delegate to super's __getattribute__
+            if type(self) is type:  # Check if self is a class
+                return super(type, self).__getattribute__(item)
+
+            # For instances, use the object's __getattribute__
+            # to prevent recursion
+            res = object.__getattribute__(self, item)
+            if res is NAO:
+                field_info = self.__class__.model_fields.get(item)
+                alias = field_info.alias or item
+                value = self._store.get(alias, NAO)
+                if value is NAO:
+                    value = field_info.get_default()
+                else:
+                    value = self._parse_value(item, value)
+                self._set_attr(item, value)
+                res = super(LazyModel, self).__getattribute__(item)
+            return res
