@@ -3,7 +3,7 @@ authors = [
     {name = "Roman Right", email = "roman-right@protonmail.com"},
 ]
 license = {text = "Apache-2.0"}
-requires-python = "<4.0,>=3.9"
+requires-python = ">=3.9,<4.0"
 dependencies = [
     "pydantic>=2.10.0,<3.0",
 ]
@@ -17,7 +17,6 @@ dev = [
     "mypy>=1.15.0",
     "pytest<8.0.0,>=7.2.0",
     "pytest-cov>=6.1.1",
-    "pytest-sugar<2.0.0,>=1.0.0",
     "ruff>=0.11.8",
 ]
 

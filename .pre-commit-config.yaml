@@ -1,18 +1,21 @@
 repos:
-  - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: v0.11.8
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.12.7
     hooks:
-      - id: ruff
-        args: [ --fix ]
-      - id: ruff-format
+      hooks:
+        # Run the linter.
+        - id: ruff-check
+          args: [ --fix ]
+        # Run the formatter.
+        - id: ruff-format
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.15.0
+    rev: v1.17.1
     hooks:
       - id: mypy
         additional_dependencies:
           - types-click
           - types-toml
   - repo: https://github.com/astral-sh/uv-pre-commit
-    rev: 0.7.2
+    rev: 0.8.6
     hooks:
       - id: uv-lock
