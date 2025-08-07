@@ -1,40 +1,54 @@
-[tool.poetry]
+[project]
+authors = [
+    {name = "Roman Right", email = "roman-right@protonmail.com"},
+]
+license = {text = "Apache-2.0"}
+requires-python = ">=3.9,<4.0"
+dependencies = [
+    "pydantic>=2.10.0,<3.0",
+]
 name = "lazy-model"
 version = "0.4.0"
 description = ""
-authors = ["Roman Right <roman-right@protonmail.com>"]
-license = "Apache-2.0"
-include = ["LICENSE"]
 readme = "README.md"
-packages = [{include = "lazy_model"}]
 
-[tool.poetry.dependencies]
-python = ">=3.9,<4.0"
-pydantic = ">=1.9.0"
+[dependency-groups]
+dev = [
+    "mypy>=1.15.0",
+    "pytest<8.0.0,>=7.2.0",
+    "pytest-cov>=6.1.1",
+    "ruff>=0.11.8",
+]
 
-[tool.poetry.group.dev.dependencies]
-pytest = "^7.2.0"
-
-[tool.black]
+[tool.ruff]
 line-length = 79
-include = '\.pyi?$'
-exclude = '''
-/(
-    \.git
-  | \.hg
-  | \.mypy_cache
-  | \.tox
-  | \.venv
-  | _build
-  | buck-out
-  | build
-  | dist
-)/
-'''
+fix = true
+include = ["**/*.py", ".github/**/*.py"]
+
+
+[tool.ruff.lint]
+ignore = ["E501","SIM112"]
+extend-select = ["I","TID","W","SIM","E","F","T10","ASYNC","YTT","FA","PERF","UP","TC","RUF"]
 
 [tool.mypy]
 ignore_missing_imports = true
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
+
+
+[tool.pydantic-mypy]
+init_forbid_extra = true
+init_typed = true
+warn_required_dynamic_aliases = true
+
+[tool.pyright]
+include = ["lazy_model"]
+reportMissingTypeStubs = "error"
+reportPropertyTypeMismatch = "error"
+reportUnusedImport = "error"
+reportUnusedClass = "error"
+reportUnusedFunction = "error"
+reportUnusedVariable = "error"
+reportDuplicateImport = "error"

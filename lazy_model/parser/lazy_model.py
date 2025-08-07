@@ -1,7 +1,9 @@
-from typing import TYPE_CHECKING, Any, Optional, Set, Dict
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any, TypeVar
 
 import pydantic_core
-from pydantic import BaseModel, PrivateAttr, ValidationError, TypeAdapter
+from pydantic import BaseModel, PrivateAttr, TypeAdapter, ValidationError
 from pydantic._internal import _fields
 
 from lazy_model.nao import NAO
@@ -9,17 +11,19 @@ from lazy_model.nao import NAO
 ROOT_KEY = "__root__"
 _object_setattr = object.__setattr__
 
+T = TypeVar("T")
+
 
 class LazyModel(BaseModel):
-    _store: Dict[str, Any] = PrivateAttr(default_factory=dict)
+    _store: dict[str, Any] = PrivateAttr(default_factory=dict)
     _lazily_parsed: bool = PrivateAttr(default=False)
 
     @classmethod
     def lazy_parse(
         cls,
-        data: Dict[str, Any],
-        fields: Optional[Set[str]] = None,
-    ):
+        data: dict[str, Any],
+        fields: set[str] | None = None,
+    ) -> LazyModel:
         fields_values = {}
         field_alias_map = {}
         if fields is None:
@@ -37,21 +41,21 @@ class LazyModel(BaseModel):
             m._set_attr(field_alias_map[alias], data[alias])
         return m
 
-    def _parse_value(self, name, value):
-        field_type = self.__class__.model_fields.get(name).annotation
+    def _parse_value(self, name: str, value: Any) -> Any:
+        field_type = self.__class__.model_fields.get(name).annotation  # type: ignore
         try:
             value = TypeAdapter(field_type).validate_python(value)
         except ValidationError as e:
             if (
                 value is None
-                and self.__class__.model_fields.get(name).required is False
+                and self.__class__.model_fields.get(name).required is False  # type: ignore
             ):
                 value = None
             else:
                 raise e
         return value
 
-    def parse_store(self):
+    def parse_store(self) -> None:
         for name in self.__class__.model_fields:
             self.__getattribute__(name)
 
@@ -66,8 +70,8 @@ class LazyModel(BaseModel):
         """
         if name in self.__class_vars__:
             raise AttributeError(
-                f"{name!r} is a ClassVar of `{self.__class__.__name__}` and cannot be set on an instance. "  # noqa: E501
-                f"If you want to set a value on the class, use `{self.__class__.__name__}.{name} = value`."  # noqa: E501
+                f"{name!r} is a ClassVar of `{self.__class__.__name__}` and cannot be set on an instance. "
+                f"If you want to set a value on the class, use `{self.__class__.__name__}.{name} = value`."
             )
         elif not _fields.is_valid_field_name(name):
             if (
@@ -78,7 +82,7 @@ class LazyModel(BaseModel):
             else:
                 attribute = self.__private_attributes__[name]
                 if hasattr(attribute, "__set__"):
-                    attribute.__set__(self, value)  # type: ignore
+                    attribute.__set__(self, value)
                 else:
                     self.__pydantic_private__[name] = value
             return
@@ -99,7 +103,7 @@ class LazyModel(BaseModel):
 
     if not TYPE_CHECKING:
 
-        def __getattribute__(self, item):
+        def __getattribute__(self, item: str) -> Any:
             # If __class__ is accessed, return it directly to avoid recursion
             if item == "__class__":
                 return super().__getattribute__(item)
@@ -107,19 +111,19 @@ class LazyModel(BaseModel):
             # If called on the class itself,
             # delegate to super's __getattribute__
             if type(self) is type:  # Check if self is a class
-                return super(type, self).__getattribute__(item)
+                return super().__getattribute__(item)
 
             # For instances, use the object's __getattribute__
             # to prevent recursion
             res = object.__getattribute__(self, item)
             if res is NAO:
                 field_info = self.__class__.model_fields.get(item)
-                alias = field_info.alias or item
+                alias = field_info.alias or item  # type: ignore
                 value = self._store.get(alias, NAO)
                 if value is NAO:
-                    value = field_info.get_default()
+                    value = field_info.get_default()  # type: ignore
                 else:
                     value = self._parse_value(item, value)
                 self._set_attr(item, value)
-                res = super(LazyModel, self).__getattribute__(item)
+                res = super().__getattribute__(item)
             return res
